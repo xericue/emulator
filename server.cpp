@@ -28,6 +28,8 @@ int main() {
     int options = 1;
     setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options));
     
+    // setting socket options to reuse sockets, beginning to create the struct 
+    // for the socket address for correct connection
     struct sockaddr_in addr {
 
     };
