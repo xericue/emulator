@@ -9,10 +9,11 @@ int main() {
     // specifies TCP socket type because TCP provides a straight
     // connection-oriented data transfer (stream -> packets)
     // i.e. IPv4+TCP protocol is what we define here
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    int tcp_socket {socket(AF_INET, SOCK_STREAM, 0)};
     // error handling
-    if (fd == 0) {
-        std::cout << "socket returned " << fd << " - error\n";
+    if (tcp_socket == 0) {
+        std::cout << "socket returned " << tcp_socket << " - error\n";
         abort();
     }
 
@@ -26,7 +27,7 @@ int main() {
     // setsockopt() - ingests the file descriptor fd - set (theres also get)
     // options on sockets
     int options = 1;
-    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options));
+    setsockopt(tcp_socket, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options));
     
     // setting socket options to reuse sockets, beginning to create the struct 
     // for the socket address for correct connection
@@ -36,6 +37,6 @@ int main() {
     
     // int bind(fd, const struct sockaddr *addr, socklen_t addrlen); 
     
-
+    
     return 0;
 }
