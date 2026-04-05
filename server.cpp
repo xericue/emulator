@@ -1,6 +1,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string>
+#include <stdint.h>
+#include <stdlib.h>
 #include <iostream>
 
 int main() {
@@ -10,26 +12,43 @@ int main() {
     // error handling
     if (tcp_socket < 0) {
         std::cout << "socket returned " << tcp_socket << " - error\n";
-        abort();
+        exit(1);
     }
 
     // bind socket to an address 
-    // bind(tcp_socket, address)
-    
-    // listen
-    
+
     // setsockopt() - ingests the file descriptor tcp_socket - set (theres also get)
     // options on sockets
     int options {1};
     setsockopt(tcp_socket, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options));
     
-    // setting socket options to reuse sockets, beginning to create the struct 
+        // setting socket options to reuse sockets, beginning to create the struct 
     // for the socket address for correct connection
-    struct sockaddr_in addr {
+    // struct sockaddr_in {
+    //     uint16_t sin_family;
+    //     uint16_t sin_port;
+    //     struct in_addr sin_addr;
+    // };
 
-    };
+    // struct in_addr {
+    //     uint32_t s_addr;
+    // };
+
+    struct sockaddr_in address = {};
+    address.sin_family = AF_INET;
+    address.sin_port = htons(8080); // port 6767
+    address.sin_addr.s_addr = htonl(0); // wildcard IP 0.0.0.0
     
-    // int bind(fd, const struct sockaddr *addr, socklen_t addrlen); 
+    // sockfd (tcp_socket), const struct sockaddr *addr, socklen_t);
+
+    int bound_socket = bind(tcp_socket, (const sockaddr *)&address, sizeof(address));
+
+    if (bound_socket) {
+        std::cout << "socket returned " << bound_socket << " - error\n";
+        exit(1);
+    }
+    
+    // listen()
     
     
     return 0;
