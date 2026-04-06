@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <cassert>
 #include "server.h"
 
 static void read_write(int socket) {
@@ -26,11 +27,19 @@ int one_request(int socket) {
 
 }
 
-ssize_t read_all() {
-
-
-
+static int32_t read_all(int fd, char *buf, size_t size) {
+    while (size > 0) {
+        ssize_t read_vector = read(fd, buf, size);
+        if (read_vector <= 0)
+            return 1;
+        assert((size_t)read_vector <= size);
+        size -= (size_t)read_vector;
+        buf += read_vector;
+    }
+    return 0;
 }
+
+ssize_t write()
 
 int main() {
     
