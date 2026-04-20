@@ -48,7 +48,7 @@ static int32_t write_all(int fd, const char *buf, size_t size) {
 }
 
 int main() {
-    
+    // i should probably be calling getsockaddrinfo here huh
     // open an unitialized socket, IPv4 + TCP protocol
     int tcp_socket {socket(AF_INET, SOCK_STREAM, 0)};
     // error handling
