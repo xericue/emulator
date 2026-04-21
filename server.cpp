@@ -8,19 +8,19 @@
 #include <cassert>
 #include "server.h"
 
-static void read_write(int socket) {
+static void read_write(int fd) {
     char buf[BUFSIZ] {}; // read buffer
-    ssize_t n = read(socket, buf, sizeof(buf));
-
+    ssize_t n = read(fd, buf, sizeof(buf) - 1);
+    // read/write or send/recv
     if (n < 0) {
-        std::cout << "read error\n";
+        std::cout << "read() error\n";
         return;
     }
 
     std::cout << "client says " << buf << '\n';
 
     char write_buffer[BUFSIZ] {"yo\n"};
-    write(socket, write_buffer, sizeof(write_buffer));
+    write(fd, write_buffer, sizeof(write_buffer)); // it writes back through fd?
 }
 
 int one_request(int socket) {
@@ -59,12 +59,11 @@ int main() {
 
     // bind socket to an address 
 
-    // setsockopt() - ingests the file descriptor tcp_socket - set (theres also get)
-    // options on sockets
+    // setsockopt() - ingests the file descriptor tcp_socket
     int options {1};
     setsockopt(tcp_socket, SOL_SOCKET, SO_REUSEADDR, &options, sizeof(options));
     
-        // setting socket options to reuse sockets, beginning to create the struct 
+    // setting socket options to reuse sockets, beginning to create the struct 
     // for the socket address for correct connection
     // struct sockaddr_in {
     //     uint16_t sin_family;
@@ -76,13 +75,13 @@ int main() {
     //     uint32_t s_addr;
     // };
 
-    struct sockaddr_in address = {};
-    address.sin_family = AF_INET; // TCP
-    address.sin_port = htons(8080); // port 8080 w/ network endianness
-    address.sin_addr.s_addr = INADDR_ANY; // read IPv4/v6 
+    struct sockaddr_in addr = {};
+    addr.sin_family = AF_INET; // TCP
+    addr.sin_port = htons(8080); // port 8080 w/ network endianness
+    addr.sin_addr.s_addr = INADDR_ANY; // read IPv4/v6 
     // sockfd (tcp_socket), const struct sockaddr *addr, socklen_t);
 
-    int bound_socket = bind(tcp_socket, (const sockaddr *)&address, sizeof(address));
+    int bound_socket = bind(tcp_socket, (const sockaddr *)&addr, sizeof(addr));
 
     if (bound_socket) {
         std::cout << "bind returned " << bound_socket << " - error\n";
@@ -107,20 +106,18 @@ int main() {
         struct sockaddr_in client = {};
         socklen_t client_len = sizeof(client);
 
-        int fd = accept(tcp_socket, (struct sockaddr *)&client, &client_len);
-        if (fd < 0) {
-            // std::cout << "accept returned " << bound_socket << " - error\n";
-            // exit(1);
-            continue;
-        }
+        // because the last param of accept ingests an address/ptr
+        int fd = accept(tcp_socket, (struct sockaddr *)&client, &client_len); // nullptr nullptr?
+        if (fd < 0) continue; // we can actually just continue because EVENTUALLY
+        // itll connect
 
         // do whatever here!
 
-        // read_write(fd);
-        while (true) {
-            int32_t err = one_request(fd); // signed int 32 bits
-            if (err) break;
-        }
+        read_write(fd);
+        // while (true) {
+        //     int32_t err = one_request(fd); // signed int 32 bits
+        //     if (err) break;
+        // }
         close(fd);
     }
 

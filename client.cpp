@@ -18,6 +18,7 @@ int main() {
         exit(1);
     }
 
+    // set it up - in C this is usually done with getsockaddrinfo
     struct sockaddr_in address {};
     address.sin_family = AF_INET;
     address.sin_port = ntohs(8080); // network programming - big endian to little endian
@@ -29,41 +30,51 @@ int main() {
         exit(1);
     }
     
-    char message[BUFSIZ] {};
+    char message[BUFSIZ] {"hello"};
+    write(tcp_socket, message, strlen(message));
 
-    while (true) {
-        std::cout << "yea yea write your message already\n";
-        std::cin >> message;
-        write(tcp_socket, message, strlen(message));
-        char buf[BUFSIZ] {};
-
-    ssize_t n = read(tcp_socket, buf, sizeof(buf));
+    char buf[BUFSIZ] {};
+    ssize_t n {read(tcp_socket, buf, sizeof(buf))};
     if (n < 0) {
         std::cout << "read error\n";
         exit(1);
     }
-
     std::cout << "server says " << buf << '\n';
-    }
-    
-    /*
-    std::cout << "yea yea write your message already\n";
-    std::cin >> message;
-    
-    write(tcp_socket, message, strlen(message));
-    */
-    
+    close(tcp_socket);
 
-    // char read_buffer[64] {};
+    // while (true) {
+    //     std::cout << "yea yea write your message already\n";
+    //     std::cin >> message;
+    //     write(tcp_socket, message, strlen(message));
+    //     char buf[BUFSIZ] {};
 
-    // ssize_t n = read(tcp_socket, read_buffer, sizeof(read_buffer));
+    // ssize_t n = read(tcp_socket, buf, sizeof(buf));
     // if (n < 0) {
     //     std::cout << "read error\n";
     //     exit(1);
     // }
 
-    // std::cout << "server says " << read_buffer << '\n';
-    close(tcp_socket);
+    // std::cout << "server says " << buf << '\n';
+    // }
+    
+    // /*
+    // std::cout << "yea yea write your message already\n";
+    // std::cin >> message;
+    
+    // write(tcp_socket, message, strlen(message));
+    // */
+    
+
+    // // char read_buffer[64] {};
+
+    // // ssize_t n = read(tcp_socket, read_buffer, sizeof(read_buffer));
+    // // if (n < 0) {
+    // //     std::cout << "read error\n";
+    // //     exit(1);
+    // // }
+
+    // // std::cout << "server says " << read_buffer << '\n';
+    // close(tcp_socket);
 
     return 0;
 }
