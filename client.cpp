@@ -20,8 +20,8 @@ int main() {
 
     struct sockaddr_in address {};
     address.sin_family = AF_INET;
-    address.sin_port = ntohs(6767); // network programming - big endian to little endian
-    address.sin_addr.s_addr = ntohl(INADDR_LOOPBACK);
+    address.sin_port = ntohs(8080); // network programming - big endian to little endian
+    address.sin_addr.s_addr = INADDR_ANY; // IPv4/6
     
     int connection_port = connect(tcp_socket, (const struct sockaddr *)&address, sizeof(address));
     if (connection_port) {
@@ -35,15 +35,15 @@ int main() {
         std::cout << "yea yea write your message already\n";
         std::cin >> message;
         write(tcp_socket, message, strlen(message));
-        char read_buffer[64] {};
+        char buf[BUFSIZ] {};
 
-    ssize_t n = read(tcp_socket, read_buffer, sizeof(read_buffer));
+    ssize_t n = read(tcp_socket, buf, sizeof(buf));
     if (n < 0) {
         std::cout << "read error\n";
         exit(1);
     }
 
-    std::cout << "server says " << read_buffer << '\n';
+    std::cout << "server says " << buf << '\n';
     }
     
     /*

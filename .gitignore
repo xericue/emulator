@@ -1,2 +1,5 @@
 a.out
 .vscode
+client
+server
+server_notes.cpp

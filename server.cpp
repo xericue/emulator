@@ -9,17 +9,17 @@
 #include "server.h"
 
 static void read_write(int socket) {
-    char read_buffer[64] {}; // read buffer
-    ssize_t n = read(socket, read_buffer, sizeof(read_buffer));
+    char buf[BUFSIZ] {}; // read buffer
+    ssize_t n = read(socket, buf, sizeof(buf));
 
     if (n < 0) {
         std::cout << "read error\n";
         return;
     }
 
-    std::cout << "client says " << read_buffer << '\n';
+    std::cout << "client says " << buf << '\n';
 
-    char write_buffer[64] {"yo\n"};
+    char write_buffer[BUFSIZ] {"yo\n"};
     write(socket, write_buffer, sizeof(write_buffer));
 }
 
@@ -77,10 +77,9 @@ int main() {
     // };
 
     struct sockaddr_in address = {};
-    address.sin_family = AF_INET;
-    address.sin_port = htons(6767); // port 6767
-    address.sin_addr.s_addr = htonl(0); // wildcard IP 0.0.0.0
-    
+    address.sin_family = AF_INET; // TCP
+    address.sin_port = htons(8080); // port 8080 w/ network endianness
+    address.sin_addr.s_addr = INADDR_ANY; // read IPv4/v6 
     // sockfd (tcp_socket), const struct sockaddr *addr, socklen_t);
 
     int bound_socket = bind(tcp_socket, (const sockaddr *)&address, sizeof(address));
@@ -108,8 +107,8 @@ int main() {
         struct sockaddr_in client = {};
         socklen_t client_len = sizeof(client);
 
-        int client_file_descriptor = accept(tcp_socket, (struct sockaddr *)&client, &client_len);
-        if (client_file_descriptor < 0) {
+        int fd = accept(tcp_socket, (struct sockaddr *)&client, &client_len);
+        if (fd < 0) {
             // std::cout << "accept returned " << bound_socket << " - error\n";
             // exit(1);
             continue;
@@ -117,12 +116,12 @@ int main() {
 
         // do whatever here!
 
-        // read_write(client_file_descriptor);
+        // read_write(fd);
         while (true) {
-            int32_t err = one_request(client_file_descriptor); // signed int 32 bits
+            int32_t err = one_request(fd); // signed int 32 bits
             if (err) break;
         }
-        close(client_file_descriptor);
+        close(fd);
     }
 
     
